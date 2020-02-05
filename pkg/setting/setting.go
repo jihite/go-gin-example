@@ -6,45 +6,79 @@ import (
 	"time"
 )
 
-var (
-	Cfg *ini.File
+var cfg *ini.File
 
+type App struct {
+	JwtSecret string
+	PageSize  int
+	PrefixUrl string
+
+	RuntimeRootPath string
+
+	ImageSavePath  string
+	ImageMaxSize   int
+	ImageAllowExts []string
+
+	ExportSavePath string
+	QrCodeSavePath string
+	FontSavePath   string
+
+	LogSavePath string
+	LogSaveName string
+	LogFileExt  string
+	TimeFormat  string
+}
+
+type Server struct {
 	RunMode      string
-	HTTPPort     int
+	HttpPort     int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+}
 
-	PageSize int
-)
+type Database struct {
+	Type        string
+	User        string
+	Password    string
+	Host        string
+	Name        string
+	TablePrefix string
+}
 
-func init() {
+type Redis struct {
+	Host        string
+	Password    string
+	MaxIdle     int
+	MaxActive   int
+	IdleTimeout time.Duration
+}
+
+var AppSetting = &App{}
+var ServerSetting = &Server{}
+var DatabaseSetting = &Database{}
+var RedisSetting = &Redis{}
+
+func Setup() {
 	var err error
-	Cfg, err = ini.Load("conf/app.ini")
+	cfg, err = ini.Load("conf/app.ini")
 	if err != nil {
 		log.Fatalf("Fail to parse 'conf/app.ini: %v", err)
 	}
-	LoadBase()
-	LoadServer()
-	LoadApp()
-}
-func LoadBase() {
-	RunMode = Cfg.Section("").Key("RUN_MODE").MustString("debug")
+
+	mapTo("app", AppSetting)
+	mapTo("server", ServerSetting)
+	mapTo("database", DatabaseSetting)
+	mapTo("redis", RedisSetting)
+
+	AppSetting.ImageMaxSize = AppSetting.ImageMaxSize * 1024 * 1024
+	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
+	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
+	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
 }
 
-func LoadServer() {
-	sec, err := Cfg.GetSection("server")
+func mapTo(section string, v interface{}) {
+	err := cfg.Section(section).MapTo(v)
 	if err != nil {
-		log.Fatalf("Fail to get section 'server: %v", err)
+		log.Fatalf("Cfg.MapTo %s err: %v", section, err)
 	}
-	HTTPPort = sec.Key("HTTP_PORT").MustInt(8080)
-	ReadTimeout = time.Duration(sec.Key("READ_TIMEOUT").MustInt(60)) * time.Second
-	WriteTimeout = time.Duration(sec.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
-}
-
-func LoadApp() {
-	sec, err := Cfg.GetSection("app")
-	if err != nil {
-		log.Fatalf("Fail to get section 'app: %v", err)
-	}
-	PageSize = sec.Key("PAGE_SIZE").MustInt(10)
 }

@@ -2,18 +2,28 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jihite/go-gin-example/pkg/setting"
+	"github.com/jihite/go-gin-example/routers/api"
 )
 
 func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	gin.SetMode(setting.RunMode)
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
+
+	apig := r.Group("/api")
+	{
+		apig.GET("/tags", api.GetTags)
+		apig.POST("/tags", api.AddTag)
+		apig.PUT("/tags/:id", api.EditTag)
+		apig.DELETE("/tags/:id", api.DeleteTag)
+		apig.POST("/tags/export", api.ExportTag)
+		apig.POST("/tags/import", api.ImportTag)
+	}
 	return r
 }
