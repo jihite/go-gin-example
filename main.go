@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jihite/go-gin-example/models"
+	"github.com/jihite/go-gin-example/pkg/logging"
 	"github.com/jihite/go-gin-example/pkg/setting"
 	"github.com/jihite/go-gin-example/routers"
 	"log"
@@ -13,6 +14,7 @@ import (
 func init() {
 	setting.Setup()
 	models.Setup()
+	logging.Setup()
 }
 
 func main() {
