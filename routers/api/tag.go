@@ -13,6 +13,13 @@ import (
 	"net/http"
 )
 
+// @Summary 获取标签
+// @Produce  json
+// @Param name query string false "Name"
+// @Param state query int false "State"
+// @Success 200 {object} app.Response
+// @Failure 500 {object} app.Response
+// @Router /api/tags [get]
 func GetTags(c *gin.Context) {
 	name := c.Query("name")
 
@@ -47,6 +54,14 @@ type AddTagForm struct {
 	State     int    `form:"state" valid:"Range(0,1)"`
 }
 
+// @Summary 新增文章标签
+// @Produce  json
+// @Param name query string true "Name"
+// @Param state query int false "State"
+// @Param created_by query string false "CreatedBy"
+// @Success 200 {object} app.Response
+// @Success 500 {object} app.Response
+// @Router /api/tags [post]
 func AddTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -88,6 +103,15 @@ type EditTagForm struct {
 	State      int    `form:"state" valid:"Range(0,1)"`
 }
 
+// @Summary 编辑文章标签
+// @Produce  json
+// @Param id path int true "ID"
+// @Param name query string true "Name"
+// @Param state query int false "State"
+// @Param modified_by query string false "ModifiedBy"
+// @Success 200 {object} app.Response
+// @Success 500 {object} app.Response
+// @Router /api/tags/{id} [put]
 func EditTag(c *gin.Context) {
 	var (
 		appG = app.Gin{C: c}
@@ -117,6 +141,12 @@ func EditTag(c *gin.Context) {
 	err = tagService.Edit()
 }
 
+// @Summary 删除文章标签
+// @Produce  json
+// @Param id path int true "ID"
+// @Success 200 {object} app.Response
+// @Success 500 {object} app.Response
+// @Router /api/tags/{id} [delete]
 func DeleteTag(c *gin.Context) {
 	appG := app.Gin{C: c}
 	valid := validation.Validation{}
